@@ -2,371 +2,693 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BABEL MASTER - Zizo Legend</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BABEL MASTER</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg-body: #050508;
-            --bg-panel: #0e1016;
+            --bg-panel: #0b0d14;
             --primary: #00f2ff;
             --secondary: #7d5fff;
             --text-main: #e0e6ed;
-            --border: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.08);
             --error: #ff4757;
             --success: #00ff9d;
-            /* فصلنا الخصائص عشان المتصفح ما يخربط بالحساب */
-            --font-family: 'Fira Code', monospace;
-            --font-size: 14px;
-            --line-height: 24px;
+            --editor-font: 14px/24px 'Fira Code', monospace;
         }
 
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; outline: none; }
         body { margin: 0; height: 100dvh; background: var(--bg-body); color: var(--text-main); font-family: 'Tajawal', sans-serif; display: flex; flex-direction: column; overflow: hidden; }
 
         /* --- الهيدر --- */
         header { 
-            height: 60px; background: var(--bg-panel); border-bottom: 1px solid var(--border); 
+            height: 55px; background: var(--bg-panel); border-bottom: 1px solid var(--border); 
             display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 10px; flex-shrink: 0; z-index: 1000; position: relative;
+            padding: 0 15px; flex-shrink: 0; z-index: 100; position: relative;
         }
 
-        .header-right { display: flex; align-items: center; gap: 10px; }
-        .logo { font-size: 18px; font-weight: 900; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
-        
-        #kingBadge {
-            color: #ffd700; font-size: 18px; cursor: pointer; padding: 5px;
-            animation: glow 2s infinite alternate;
-        }
-        @keyframes glow { from { text-shadow: 0 0 5px #ffd700; } to { text-shadow: 0 0 15px #ffaa00; } }
-
-        .header-left { display: flex; align-items: center; gap: 6px; }
-
-        .credits-pill {
-            background: rgba(0, 242, 255, 0.05); border: 1px solid var(--border);
-            padding: 0 10px; border-radius: 6px; color: var(--primary); font-family: 'Fira Code';
-            font-size: 12px; display: flex; align-items: center; gap: 5px; height: 36px;
-        }
+        .logo { font-size: 18px; font-weight: 900; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .toolbar { display: flex; gap: 8px; align-items: center; }
 
         .icon-btn { 
-            width: 36px; height: 36px; border-radius: 6px; 
-            background: rgba(255,255,255,0.03); 
-            border: 1px solid var(--border); color: #fff; display: flex; 
+            width: 36px; height: 36px; border-radius: 6px; background: rgba(255,255,255,0.05); 
+            border: 1px solid var(--border); color: var(--primary); display: flex; 
             align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; 
         }
-        .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .icon-btn:hover { background: var(--primary); color: #000; }
+        .run-btn { color: var(--success); border-color: rgba(0, 255, 157, 0.3); }
 
-        /* --- المحرر --- */
+        /* --- القائمة المنسدلة --- */
+        .dropdown-menu {
+            position: absolute; top: 60px; left: 15px; background: var(--bg-panel); border: 1px solid var(--border); 
+            border-radius: 8px; min-width: 220px; display: none; flex-direction: column; z-index: 2000; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px);
+        }
+        .dropdown-menu.show { display: flex; }
+        
+        .menu-header {
+            padding: 15px; border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            text-align: center;
+        }
+        .credits-box {
+            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border);
+            padding: 8px; border-radius: 6px; color: gold; font-family: 'Fira Code';
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .dropdown-item { padding: 12px 15px; color: var(--text-main); cursor: pointer; border-bottom: 1px solid var(--border); font-size: 14px; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .dropdown-item:hover { background: rgba(0, 242, 255, 0.1); color: var(--primary); }
+        .dropdown-item:last-child { border-bottom: none; }
+
+        /* --- مساحة العمل والمحرر --- */
         .workspace { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
         .editor-container { flex: 1; display: flex; background: #080a10; direction: ltr; overflow: hidden; position: relative; }
-        .gutter { width: 40px; background: #0c0e14; color: #4b5263; text-align: center; padding-top: 15px; font-family: var(--font-family); font-size: var(--font-size); line-height: var(--line-height); border-right: 1px solid var(--border); user-select: none; }
         
-        .editor-wrapper { flex: 1; position: relative; cursor: text; overflow: hidden; }
+        .gutter { 
+            width: 40px; background: #0c0e14; color: #4b5263; text-align: center; 
+            padding-top: 15px; font: var(--editor-font); border-right: 1px solid var(--border); 
+            user-select: none; line-height: 24px;
+        }
         
-        /* التعديل الجوهري: منعنا الحواف الغريبة ووحدنا الخط */
+        .editor-wrapper { flex: 1; position: relative; overflow: hidden; }
+        
+        /* ضبط الطبقات بدقة عشان المؤشر والسكرول */
         .editor-layer { 
-            position: absolute; inset: 0; padding: 15px; margin: 0; border: 0; 
-            font-family: var(--font-family); 
-            font-size: var(--font-size);
-            line-height: var(--line-height);
-            white-space: pre; 
-            tab-size: 4; 
-            overflow: auto; 
-            word-wrap: normal;
-            font-variant-ligatures: none; /* هاي تمنع النص يتغير حجمه لما ينكتب رموز */
-            letter-spacing: normal;
+            position: absolute; inset: 0; padding: 15px; margin: 0; border: 0;
+            font: var(--editor-font); white-space: pre; line-height: 24px; tab-size: 4; 
+            word-wrap: normal; overflow: auto;
         }
         
-        /* طبقة التلوين */
-        #highlighting { 
-            z-index: 1; 
-            pointer-events: none; 
-            color: #abb2bf; 
-        }
-        
-        /* طبقة الكتابة */
         #codeEditor { 
-            background: transparent; 
-            color: transparent; /* النص شفاف عشان نشوف اللي تحته */
-            caret-color: var(--primary); 
-            z-index: 2; 
-            resize: none; 
+            background: transparent; color: transparent; z-index: 2; 
+            resize: none; caret-color: var(--primary); 
         }
+        #highlighting { z-index: 1; pointer-events: none; color: #abb2bf; }
 
-        /* الإكمال التلقائي - تعديل الموقع */
-        #autocomplete { 
-            position: absolute; 
-            background: #15171e; 
-            border: 1px solid var(--secondary); 
-            display: none; 
-            z-index: 500; 
-            border-radius: 6px; 
-            max-height: 150px; 
-            overflow-y: auto; 
-            min-width: 150px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5); 
-            /* شلنا التوب واللفت الثابتات */
-        }
-        .auto-item { padding: 8px 12px; cursor: pointer; color: #a0a0a0; font-family: 'Fira Code'; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; }
-        .auto-item:hover, .auto-item.active { background: rgba(125, 95, 255, 0.2); color: var(--secondary); }
-        .auto-item strong { color: var(--primary); }
-
-        /* شريط الاختصارات */
+        /* --- شريط الاختصارات --- */
         .shortcut-bar { 
-            height: 45px; background: var(--bg-panel); border-top: 1px solid var(--border); 
-            display: flex; align-items: center; gap: 8px; padding: 0 10px; overflow-x: auto; 
+            height: 45px; background: var(--bg-panel); border-top: 1px solid var(--border);
+            display: flex; align-items: center; gap: 5px; padding: 0 10px; overflow-x: auto;
         }
-        .sc-key { 
-            min-width: 35px; height: 32px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
-            border-radius: 4px; color: var(--text-main); display: flex; align-items: center; justify-content: center; 
-            font-family: 'Fira Code'; font-size: 14px; cursor: pointer; flex-shrink: 0;
+        .sc-key {
+            min-width: 35px; height: 32px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border); border-radius: 4px; color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Fira Code'; font-size: 14px; cursor: pointer; user-select: none;
         }
+        .sc-key:hover { background: var(--primary); color: #000; }
 
-        /* التيرمنال */
-        #termView { position: fixed; inset: 0; background: #050508; display: none; flex-direction: column; direction: ltr; z-index: 9000; }
-        .term-header { padding: 15px; background: #0b0d14; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        #consoleOutput { flex: 1; padding: 20px; font-family: 'Fira Code'; overflow-y: auto; color: #00ff9d; font-size: 14px; }
+        /* --- التيرمنال --- */
+        #termView { 
+            height: 160px; background: #050508; border-top: 2px solid var(--primary); 
+            display: none; flex-direction: column; direction: ltr; z-index: 150;
+        }
+        .term-header { padding: 5px 10px; background: var(--bg-panel); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        #consoleOutput { flex: 1; padding: 10px; font-family: 'Fira Code'; font-size: 12px; overflow-y: auto; white-space: pre-wrap; color: #00ff9d; }
 
-        /* ألوان Syntax */
+        /* --- بوابة التعريف --- */
+        #identityGate { position: fixed; inset: 0; background: var(--bg-body); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .gate-card { background: var(--bg-panel); padding: 40px; border-radius: 15px; border: 1px solid var(--primary); text-align: center; width: 90%; max-width: 380px; box-shadow: 0 0 40px rgba(0, 242, 255, 0.1); }
+        .gate-card input { width: 100%; padding: 12px; background: #000; border: 1px solid var(--border); border-radius: 8px; color: #fff; text-align: center; margin-bottom: 15px; font-size: 16px; }
+        .gate-card button { width: 100%; padding: 12px; background: var(--primary); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Tajawal'; }
+
+        /* --- الإكمال التلقائي --- */
+        #autocomplete {
+            position: absolute; background: #1a1a1a; border: 1px solid var(--primary);
+            display: none; z-index: 3000; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            max-height: 150px; overflow-y: auto; min-width: 120px;
+        }
+        .auto-item { padding: 8px 12px; cursor: pointer; color: #fff; font-family: 'Fira Code'; font-size: 13px; text-align: left; }
+        .auto-item:hover, .auto-item.active { background: var(--primary); color: #000; }
+
+        /* Syntax Colors */
         .tok-kwd { color: #ff79c6; font-weight: bold; } 
         .tok-str { color: #f1fa8c; } 
         .tok-num { color: #bd93f9; } 
-        .tok-var { color: #8be9fd; } 
+        .tok-var { color: #8be9fd; }
         .tok-cmt { color: #6272a4; font-style: italic; }
-        .tok-sym { color: #ffb86c; }
 
+        /* --- أزرار التحكم الجديدة --- */
+        .control-bar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+        .control-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--primary);
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: 'Fira Code';
+            transition: 0.2s;
+        }
+        .control-btn:hover {
+            background: var(--primary);
+            color: #000;
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="header-right">
-        <div class="logo">BABEL MASTER</div>
-        <div id="kingBadge" onclick="window.location.href='seibond.html'" title="الإدارة">
-            <i class="fas fa-crown"></i>
-        </div>
-    </div>
+<div id="autocomplete"></div>
 
-    <div class="header-left">
-        <div class="icon-btn" onclick="window.location.href='drdsha.html'" title="الدردشة">
-            <i class="fas fa-comments"></i>
+<div id="identityGate">
+    <div class="gate-card">
+        <div class="logo" style="font-size: 24px; margin-bottom: 20px;">BABYLON ID</div>
+        <input type="text" id="idInput" placeholder="أدخل اسمك البرمجي..." autocomplete="off">
+        <button onclick="unlockGate()">تسجيل الدخول</button>
+        <div id="gateError" style="color:var(--error); font-size:12px; margin-top:10px;"></div>
+    </div>
+</div>
+
+<header>
+    <div class="logo">BABEL MASTER</div>
+    <div class="toolbar">
+        <div id="kingBadge" style="display:none; color:gold;"><i class="fas fa-crown"></i></div>
+        <div class="icon-btn run-btn" id="runBtn" title="تشغيل"><i class="fas fa-play"></i></div>
+        <div class="icon-btn" id="menuBtn"><i class="fas fa-bars"></i></div>
+    </div>
+    
+    <div class="dropdown-menu" id="dropdownMenu">
+        <div class="menu-header">
+            <div class="credits-box">
+                <span><i class="fas fa-bolt"></i> الرصيد</span>
+                <span id="creditsDisplay">0</span>
+            </div>
         </div>
-        <div class="icon-btn" onclick="window.location.href='profile.html'" title="الملف الشخصي">
-            <i class="fas fa-user-astronaut"></i>
+        <div class="dropdown-item" onclick="location.href='profile.html'">
+            <i class="fas fa-user-circle"></i> الملف الشخصي
         </div>
-        <div class="credits-pill">
-            <i class="fas fa-coins"></i>
-            <span id="creditsDisplay">0</span>
+        <div class="dropdown-item" onclick="saveCode()">
+            <i class="fas fa-save"></i> حفظ المشروع
         </div>
-        <div class="icon-btn" onclick="runBabylon()" title="تشغيل" style="border-color:var(--success); color:var(--success)">
-            <i class="fas fa-play"></i>
+        <div class="dropdown-item" onclick="buildCode()">
+            <i class="fas fa-cube"></i> بناء البرنامج
+        </div>
+        <div class="dropdown-item" onclick="loadCode()">
+            <i class="fas fa-folder-open"></i> تحميل مشروع
+        </div>
+        <div class="dropdown-item" onclick="clearEditor()">
+            <i class="fas fa-trash"></i> مسح الكل
+        </div>
+        <div class="dropdown-item" onclick="location.reload()">
+            <i class="fas fa-sync-alt"></i> خروج
         </div>
     </div>
 </header>
 
 <div class="workspace">
-    <div id="autocomplete"></div>
+    <!-- أزرار التحكم الجديدة -->
+    <div class="control-bar">
+        <button class="control-btn" onclick="undoCode()" title="تراجع (Ctrl+Z)">
+            <i class="fas fa-undo"></i>
+        </button>
+        <button class="control-btn" onclick="redoCode()" title="إعادة (Ctrl+Y)">
+            <i class="fas fa-redo"></i>
+        </button>
+    </div>
+
     <div class="editor-container">
         <div class="gutter" id="lineNumbers">1</div>
         <div class="editor-wrapper">
             <pre id="highlighting" class="editor-layer"></pre>
-            <textarea id="codeEditor" class="editor-layer" spellcheck="false" placeholder="// اكتب الكود هنا يا أسطورة..."></textarea>
+            <textarea id="codeEditor" class="editor-layer" spellcheck="false" placeholder="// اكتب كود بابل هنا..."></textarea>
         </div>
     </div>
 
     <div class="shortcut-bar">
-        <div class="sc-key" onclick="insertCode('say ')">say</div>
-        <div class="sc-key" onclick="insertCode('var ')">var</div>
-        <div class="sc-key" onclick="insertCode('if ()')">if</div>
-        <div class="sc-key" onclick="insertCode('{}')">{ }</div>
-        <div class="sc-key" onclick="insertCode('()')">( )</div>
-        <div class="sc-key" onclick="insertCode('=')">=</div>
-        <div class="sc-key" onclick="insertCode(';')">;</div>
-        <div class="sc-key" onclick="insertCode('$')">$</div>
-        <div class="sc-key" onclick="insertCode('«»')"></div>
+        <div class="sc-key" onclick="insert('    ')">Tab</div>
+        <div class="sc-key" onclick="insertPair('(', ')')">( )</div>
+        <div class="sc-key" onclick="insertPair('[', ']')">[ ]</div>
+        <div class="sc-key" onclick="insertPair('{', '}')">{ }</div>
+        <div class="sc-key" onclick="insertPair('\'', '\'')">' '</div>
+        <div class="sc-key" onclick="insertPair('\"', '\"')">" "</div>
+        <div class="sc-key" onclick="insert('=')">=</div>
+        <div class="sc-key" onclick="insert(';')">;</div>
+        <div class="sc-key" onclick="insert('$')">$</div>
+    </div>
+
+    <div id="termView">
+        <div class="term-header">
+            <span style="color:var(--primary); font-size: 11px;">TERMINAL OUTPUT</span>
+            <i class="fas fa-times" onclick="document.getElementById('termView').style.display='none'" style="cursor:pointer; color:var(--error)"></i>
+        </div>
+        <div id="consoleOutput"></div>
     </div>
 </div>
 
-<div id="termView">
-    <div class="term-header">
-        <span style="color:var(--primary); font-weight:bold;"><i class="fas fa-terminal"></i> BABYLON CONSOLE</span>
-        <i class="fas fa-times" onclick="document.getElementById('termView').style.display='none'" style="cursor:pointer; color:var(--error); font-size: 20px;"></i>
-    </div>
-    <div id="consoleOutput"></div>
-</div>
+<!-- 🛡️ النواة المدمجة (Fallback) -->
+<script>
+// Fallback إذا لم تحمل الملفات الخارجية
+if (typeof BabylonCore === 'undefined') {
+    window.BabylonCore = {
+        execute: async (code, term) => {
+            try {
+                // محاكاة بسيطة للتشغيل
+                term.print("🔱 [BABYLON CORE] جاري التنفيذ...");
+                const lines = code.split('\n').filter(l => l.trim());
+                for (let line of lines) {
+                    if (line.startsWith('say ')) {
+                        term.print(line.replace('say ', ''), "#00ff9d");
+                    } else if (line.startsWith('var ')) {
+                        term.print("✅ تعريف متغير: " + line, "#ffd700");
+                    } else if (line.trim()) {
+                        term.print("⚙️ " + line, "#00f2ff");
+                    }
+                }
+                term.print("✅ تم التنفيذ!", "#00ff9d");
+            } catch (e) {
+                term.print("❌ خطأ: " + e.message, "#ff4757");
+            }
+        },
+        checkBalance: async () => {
+            return parseInt(localStorage.getItem('babel_credits') || '0');
+        },
+        consumeCredits: async (amount, reason) => {
+            let current = parseInt(localStorage.getItem('babel_credits') || '0');
+            if (current >= amount) {
+                localStorage.setItem('babel_credits', current - amount);
+                return true;
+            }
+            return false;
+        },
+        processCommand: async (code, term) => {
+            await BabylonCore.execute(code, term);
+        }
+    };
+}
 
-<script src="bavault.js"></script>
-<script src="basisst.js"></script>
-<script src="interpreter.js"></script>
-<script src="bacore2t.js"></script>
-<script src="cyber_tools.js"></script>
-<script src="cyber_engine.js"></script>
-<script src="babylon_is_heavy.js"></script>
-<script src="babylon_core.js"></script>
+if (typeof SecondaryKernel === 'undefined') {
+    window.SecondaryKernel = {
+        handleRequest: async (req) => {
+            console.log("🔱 [SecondaryKernel] Request:", req.type);
+            if (req.type === 'AUTH_USER') {
+                localStorage.setItem('babel_credits', '10'); // هدية الولوج
+                return { success: true };
+            }
+            if (req.type === 'SAVE_FILE') {
+                localStorage.setItem('saved_code_' + req.userID, req.content);
+                return { success: true };
+            }
+            if (req.type === 'UPDATE_DAILY_CREDITS') {
+                let current = parseInt(localStorage.getItem('babel_credits') || '0');
+                localStorage.setItem('babel_credits', current + 10);
+                return { success: true };
+            }
+            return { success: false };
+        }
+    };
+}
+</script>
 
 <script>
-// --- إعدادات المحرر ---
+/**
+ * 🔱 BABYLON INTERFACE LAYER - [SOVEREIGN EDITION v3.0]
+ * الإصدار المثبت والمحسن
+ */
+
+// --- 1. عناصر DOM ---
 const editor = document.getElementById('codeEditor');
 const highlighting = document.getElementById('highlighting');
 const gutter = document.getElementById('lineNumbers');
+const consoleOutput = document.getElementById('consoleOutput');
+const termView = document.getElementById('termView');
 const autoPopup = document.getElementById('autocomplete');
+const dropdownMenu = document.getElementById('dropdownMenu');
 const creditsDisplay = document.getElementById('creditsDisplay');
 
-// قائمة الكلمات للمساعدة
-const KEYWORDS = ['say', 'ask', 'var', 'loop', 'if', 'else', 'wait', 'check', 'calc', 'random', 'grab', 'ping', 'clear', 'login', 'connect'];
+// كلمات مفتاحية محدثة
+const BABEL_KEYWORDS = ['say', 'ask', 'var', 'loop', 'if', 'else', 'build_program', 'wait', 'check', 'stop', 'calc', 'random'];
 
-// دالة التلوين
-function syncEditor() {
-    let code = editor.value;
-    
-    // استبدال الرموز لطبقة العرض فقط
-    let html = code
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-        .replace(/"(.*?)"/g, '<span class="tok-str">"$1"</span>')
-        .replace(/\b(say|ask|var|loop|if|else|wait|check|calc|random|grab|ping|clear|login|connect)\b/g, '<span class="tok-kwd">$1</span>')
-        .replace(/\$(\w+)/g, '<span class="tok-var">$$$1</span>')
-        .replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>')
-        .replace(/(=|\+|\-|\*|\/|\{|\}|\(|\)|;)/g, '<span class="tok-sym">$1</span>')
-        .replace(/(\/\/.*)/g, '<span class="tok-cmt">$1</span>');
-
-    // نضيف فراغ بالنهاية عشان يطابق التكست ايريا
-    highlighting.innerHTML = html + '<br>'; 
-    
-    // أرقام الأسطر
-    gutter.innerHTML = Array.from({length: code.split('\n').length}, (_, i) => i + 1).join('<br>');
+// --- 2. نظام التراجع/الإعادة ---
+let codeHistory = [];
+let historyIndex = -1;
+function saveHistory() {
+    const code = editor.value;
+    if (codeHistory[historyIndex] !== code) {
+        codeHistory = codeHistory.slice(0, historyIndex + 1);
+        codeHistory.push(code);
+        historyIndex++;
+        if (codeHistory.length > 50) codeHistory.shift();
+    }
+}
+function undoCode() {
+    if (historyIndex > 0) {
+        historyIndex--;
+        editor.value = codeHistory[historyIndex];
+        sync();
+    }
+}
+function redoCode() {
+    if (historyIndex < codeHistory.length - 1) {
+        historyIndex++;
+        editor.value = codeHistory[historyIndex];
+        sync();
+    }
 }
 
-// مزامنة السكرول - مهم جداً
+// --- 3. نظام الهوية ---
+async function unlockGate() {
+    const nameInput = document.getElementById('idInput').value.trim();
+    const errorDisplay = document.getElementById('gateError');
+    
+    if (nameInput.length < 3) {
+        errorDisplay.innerText = "🚨 الاسم قصير جداً!";
+        return;
+    }
+
+    const finalID = nameInput === "0zasababel" ? "BABEL-1BA" : 'BABEL-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+    try {
+        const loginResponse = await SecondaryKernel.handleRequest({
+            type: 'AUTH_USER',
+            username: nameInput,
+            userID: finalID
+        });
+
+        if (loginResponse && loginResponse.success) {
+            localStorage.setItem('babel_access', 'granted');
+            localStorage.setItem('babel_username', nameInput);
+            localStorage.setItem('babel_id', finalID);
+            localStorage.setItem('babel_credits', '10'); // هدية التسجيل
+            enterSystem(nameInput, finalID);
+        } else {
+            errorDisplay.innerText = "❌ فشل المصادقة!";
+        }
+    } catch (e) {
+        errorDisplay.innerText = "⚠️ خطأ في النواة: " + e.message;
+    }
+}
+
+async function enterSystem(name, id) {
+    document.getElementById('identityGate').style.display = 'none';
+    termView.style.display = 'flex';
+    
+    await updateCreditsDisplay();
+    
+    if (name === "0zasababel") {
+        document.getElementById('kingBadge').style.display = 'block';
+        consoleOutput.innerHTML = `<span style="color:#ffd700">🔱 [SYSTEM] المشرف الموثوق: ${name}</span>\n`;
+    } else {
+        consoleOutput.innerHTML = `<span style="color:var(--success)">[SYSTEM] مرحباً ${name} | ID: ${id}</span>\n`;
+    }
+    
+    // تحميل الكود المحفوظ
+    const saved = localStorage.getItem('saved_code_' + id);
+    if (saved) {
+        editor.value = saved;
+        sync();
+        saveHistory();
+    }
+}
+
+async function updateCreditsDisplay() {
+    const currentCr = await BabylonCore.checkBalance();
+    creditsDisplay.innerText = currentCr;
+}
+
+// --- 4. محرك التحرير (المحسن) ---
+let syncTimeout;
+editor.addEventListener('input', () => {
+    clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(() => {
+        sync();
+        saveHistory();
+        checkAutocomplete();
+    }, 100); // debounce لتحسين الأداء
+});
+
 editor.addEventListener('scroll', () => {
     highlighting.scrollTop = editor.scrollTop;
     highlighting.scrollLeft = editor.scrollLeft;
     gutter.scrollTop = editor.scrollTop;
 });
 
-editor.addEventListener('input', () => {
-    syncEditor();
-    checkAutocomplete();
+editor.addEventListener('keydown', (e) => {
+    // التراجع بـ Ctrl+Z
+    if (e.ctrlKey && e.key === 'z') {
+        e.preventDefault();
+        undoCode();
+        return;
+    }
+    // الإعادة بـ Ctrl+Y
+    if (e.ctrlKey && e.key === 'y') {
+        e.preventDefault();
+        redoCode();
+        return;
+    }
+    
+    // Tab
+    if (e.key === 'Tab') {
+        e.preventDefault();
+        if (autoPopup.style.display === 'block') {
+            const activeItem = autoPopup.querySelector('.auto-item');
+            if (activeItem) activeItem.click();
+        } else {
+            insertText('    ');
+        }
+        return;
+    }
+
+    // أقواس ذكية
+    const pairs = { '(': ')', '{': '}', '[': ']', '"': '"', "'": "'" };
+    if (pairs[e.key] && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        editor.value = editor.value.substring(0, start) + e.key + pairs[e.key] + editor.value.substring(end);
+        editor.selectionStart = editor.selectionEnd = start + 1;
+        sync();
+        saveHistory();
+    }
 });
 
-// --- الإكمال التلقائي المعدل ---
-function checkAutocomplete() {
-    const val = editor.value;
-    const end = editor.selectionEnd;
-    
-    // نأخذ الكلمة الحالية
-    let start = end;
-    while (start > 0 && /[\w]/.test(val[start - 1])) start--;
-    const word = val.substring(start, end);
-
-    if (word.length < 1) {
-        autoPopup.style.display = 'none';
-        return;
-    }
-
-    const matches = KEYWORDS.filter(k => k.startsWith(word));
-    
-    if (matches.length > 0) {
-        let html = matches.map(m => 
-            `<div class="auto-item" onclick="insertAuto('${m}')"><strong>${word}</strong>${m.substring(word.length)}</div>`
-        ).join('');
-        
-        autoPopup.innerHTML = html;
-        autoPopup.style.display = 'block';
-        
-        // --- حساب الموقع الجديد (تحت المؤشر) ---
-        // بما أن الخط monospace والحجم ثابت، نكدر نحسب تقريبي
-        const textUpToCaret = val.substring(0, end);
-        const lines = textUpToCaret.split('\n');
-        const currentLineIndex = lines.length; 
-        const currentLineText = lines[lines.length - 1]; // النص في السطر الحالي قبل المؤشر
-        
-        // حسابات تقريبية (8.4px عرض الحرف، 24px ارتفاع السطر)
-        const charWidth = 8.5; 
-        const lineHeight = 24;
-        const gutterWidth = 40;
-        const paddingLeft = 15;
-        
-        // الموقع من اليسار = عرض الجتر + بادينج + عدد الحروف * عرض الحرف
-        // الموقع من فوق = عدد الاسطر * ارتفاع السطر - السكرول
-        
-        let leftPos = gutterWidth + paddingLeft + (currentLineText.length * charWidth);
-        let topPos = (currentLineIndex * lineHeight) - editor.scrollTop + 10; // +10 تنزيل شوية
-
-        // حدود الشاشة عشان ما تطلع برا
-        if(leftPos > window.innerWidth - 160) leftPos = window.innerWidth - 160;
-
-        autoPopup.style.left = leftPos + 'px';
-        autoPopup.style.top = topPos + 'px';
-
-    } else {
-        autoPopup.style.display = 'none';
-    }
-}
-
-function insertAuto(text) {
-    const val = editor.value;
-    const end = editor.selectionEnd;
-    let start = end;
-    while (start > 0 && /[\w]/.test(val[start - 1])) start--;
-    
-    const before = val.substring(0, start);
-    const after = val.substring(end);
-    
-    editor.value = before + text + " " + after;
-    editor.selectionStart = editor.selectionEnd = start + text.length + 1;
-    editor.focus();
-    
-    autoPopup.style.display = 'none';
-    syncEditor();
-}
-
-function insertCode(text) {
+function insertText(text) {
     const start = editor.selectionStart;
     const end = editor.selectionEnd;
-    editor.setRangeText(text, start, end, 'end');
+    editor.value = editor.value.substring(0, start) + text + editor.value.substring(end);
+    editor.selectionStart = editor.selectionEnd = start + text.length;
+    sync();
+    saveHistory();
+}
+
+function insertPair(open, close) {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    editor.value = editor.value.substring(0, start) + open + close + editor.value.substring(end);
+    editor.selectionStart = editor.selectionEnd = start + 1;
+    sync();
+    saveHistory();
+}
+
+function sync() {
+    let code = editor.value;
+    let highlighted = code
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"(.*?)"/g, '<span class="tok-str">"$1"</span>')
+        .replace(/\/\/.*/g, '<span class="tok-cmt">$&</span>')
+        .replace(/\b(say|ask|var|loop|if|else|build_program|check|wait|stop|calc|random)\b/g, '<span class="tok-kwd">$1</span>')
+        .replace(/\$(\w+)/g, '<span class="tok-var">$$$1</span>')
+        .replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+
+    if (code[code.length-1] === "\n") highlighted += " ";
+    highlighting.innerHTML = highlighted;
     
-    if (text === '()' || text === '{}' || text === '""') {
-        editor.selectionStart = editor.selectionEnd = start + 1;
-    }
-    editor.focus();
-    syncEditor();
+    // مزامنة السكرول
+    highlighting.scrollTop = editor.scrollTop;
+    highlighting.scrollLeft = editor.scrollLeft;
+    const lines = code.split('\n').length;
+    gutter.innerHTML = Array.from({length: lines}, (_, i) => i + 1).join('<br>');
+    gutter.scrollTop = editor.scrollTop;
+    checkCursorVisibility();
 }
 
-async function runBabylon() {
-    const termView = document.getElementById('termView');
-    const consoleDiv = document.getElementById('consoleOutput');
-    termView.style.display = 'flex';
-    consoleDiv.innerHTML = `<div style="color:#7d5fff">[SYSTEM] جاري الاتصال بالنواة...</div>`;
+// التأكد من ظهور المؤشر
+function checkCursorVisibility() {
+    const lineHeight = 24;
+    const scrollTop = editor.scrollTop;
+    const cursorPos = editor.selectionStart;
+    const textBeforeCursor = editor.value.substring(0, cursorPos);
+    const currentLine = textBeforeCursor.split('\n').length;
+    const cursorTop = (currentLine - 1) * lineHeight;
+    
+    if (cursorTop < scrollTop) {
+        editor.scrollTop = cursorTop;
+    } else if (cursorTop + lineHeight > scrollTop + editor.clientHeight) {
+        editor.scrollTop = cursorTop + lineHeight - editor.clientHeight + 10;
+    }
+}
 
-    const termInterface = {
-        print: (msg, color) => {
-            const line = document.createElement('div');
-            line.style.color = color || '#00ff9d';
-            line.innerHTML = msg;
-            consoleDiv.appendChild(line);
-            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+// --- 5. الإكمال التلقائي (المحسن) ---
+let lastWord = '';
+function checkAutocomplete() {
+    const cursor = editor.selectionStart;
+    const text = editor.value.substring(0, cursor);
+    const words = text.split(/[\s\(\)\{\}\[\]]+/);
+    lastWord = words[words.length - 1];
+
+    if (lastWord.length >= 1) {
+        const matches = BABEL_KEYWORDS.filter(k => k.startsWith(lastWord));
+        if (matches.length > 0) {
+            showAutocomplete(matches);
+        } else {
+            hideAutocomplete();
         }
-    };
-
-    if (typeof BabylonCore === 'undefined') {
-        termInterface.print("🚫 خطأ فادح: ملفات BabylonCore مفقودة!", "#ff4757");
-        return;
-    }
-
-    try {
-        await BabylonCore.execute(editor.value, termInterface); 
-    } catch (e) {
-        termInterface.print(`💥 خطأ برمجي: ${e.message}`, "#ff4757");
+    } else {
+        hideAutocomplete();
     }
 }
 
-window.onload = () => {
-    syncEditor();
-    if(localStorage.getItem('babel_credits')) {
-        creditsDisplay.innerText = localStorage.getItem('babel_credits');
+function showAutocomplete(matches) {
+    const html = matches.map(m => 
+        `<div class="auto-item" onclick="applyAuto('${m}')"><strong>${lastWord}</strong>${m.substring(lastWord.length)}</div>`
+    ).join('');
+    autoPopup.innerHTML = html;
+    autoPopup.style.display = 'block';
+    
+    // حساب الموقع بدقة
+    const textBeforeCursor = editor.value.substring(0, editor.selectionStart);
+    const lines = textBeforeCursor.split('\n');
+    const currentLine = lines.length;
+    const currentLineText = lines[lines.length - 1];
+    
+    const charWidth = 8.5;
+    const lineHeight = 24;
+    const gutterWidth = 40;
+    const paddingLeft = 15;
+    
+    const leftPos = gutterWidth + paddingLeft + (currentLineText.length * charWidth) + 5;
+    const topPos = (currentLine * lineHeight) - editor.scrollTop + 10;
+    
+    autoPopup.style.left = Math.min(leftPos, window.innerWidth - 160) + 'px';
+    autoPopup.style.top = topPos + 'px';
+}
+
+function applyAuto(word) {
+    const cursor = editor.selectionStart;
+    const before = editor.value.substring(0, cursor - lastWord.length);
+    const after = editor.value.substring(cursor);
+    editor.value = before + word + " " + after;
+    editor.selectionStart = editor.selectionEnd = cursor + (word.length - lastWord.length) + 1;
+    hideAutocomplete();
+    sync();
+    saveHistory();
+}
+
+function hideAutocomplete() {
+    autoPopup.style.display = 'none';
+}
+
+// إغلاق الإكمال بالنقر برا
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#autocomplete') && !e.target.closest('#codeEditor')) {
+        hideAutocomplete();
+    }
+});
+
+// --- 6. أوامر التشغيل والبناء ---
+async function buildCode() {
+    const userName = localStorage.getItem('babel_username');
+    const userID = localStorage.getItem('babel_id');
+
+    const success = await BabylonCore.consumeCredits(1, "BUILD_EXEC");
+    if (success) {
+        await updateCreditsDisplay();
+        termView.style.display = 'flex';
+        consoleOutput.innerHTML += `\n<span style="color:#00e5ff">[BUILD]</span> جارِ المعالجة.. المتبقي: ${await BabylonCore.checkBalance()} CR\n`;
+        await BabylonCore.execute(editor.value, {
+            print: (msg, color) => {
+                consoleOutput.innerHTML += `<span style="color:${color}">${msg}</span>\n`;
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            }
+        });
+    } else {
+        alert("⚠️ رصيدك غير كافٍ! تحتاج 1 CR");
+    }
+}
+
+async function saveCode() {
+    const userID = localStorage.getItem('babel_id');
+    await SecondaryKernel.handleRequest({
+        type: 'SAVE_FILE',
+        userID: userID,
+        content: editor.value
+    });
+    alert('✅ تم حفظ المشروع بنجاح!');
+    saveHistory();
+}
+
+function loadCode() {
+    const userID = localStorage.getItem('babel_id');
+    const saved = localStorage.getItem('saved_code_' + userID);
+    if (saved) {
+        if (confirm('تحميل المشروع المحفوظ؟ سيفقد الكود الحالي.')) {
+            editor.value = saved;
+            sync();
+            saveHistory();
+            alert('✅ تم التحميل!');
+        }
+    } else {
+        alert('⚠️ لا يوجد مشروع محفوظ!');
+    }
+}
+
+function clearEditor() {
+    if (confirm('⚠️ مسح الكود كاملاً؟')) {
+        editor.value = '';
+        sync();
+        saveHistory();
+    }
+}
+
+// --- 7. إدارة القائمة والأحداث ---
+if(document.getElementById('menuBtn')) {
+    document.getElementById('menuBtn').onclick = (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+    };
+}
+document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
+
+// --- 8. الحفظ التلقائي ---
+setInterval(() => {
+    const userID = localStorage.getItem('babel_id');
+    if (userID && editor.value) {
+        localStorage.setItem('autosave_' + userID, editor.value);
+    }
+}, 5000); // كل 5 ثواني
+
+// --- 9. التشغيل التلقائي ---
+window.onload = async () => {
+    if (localStorage.getItem('babel_access') === 'granted') {
+        const savedName = localStorage.getItem('babel_username');
+        const savedID = localStorage.getItem('babel_id');
+        await enterSystem(savedName, savedID);
+    }
+    sync();
+    saveHistory();
+    
+    // التحقق من الحفظ التلقائي
+    const userID = localStorage.getItem('babel_id');
+    if (userID) {
+        const autosaved = localStorage.getItem('autosave_' + userID);
+        if (autosaved && !editor.value) {
+            editor.value = autosaved;
+            sync();
+            saveHistory();
+        }
     }
 };
 </script>
+
 </body>
 </html>
